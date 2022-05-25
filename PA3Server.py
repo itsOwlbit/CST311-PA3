@@ -3,6 +3,9 @@
 # Title: PA3Server.py
 # Description: This is a TCP server program that ...
 
+# Question: Explain why you need multithreading to solve this problem.
+# Answer: 
+
 # socket module used for network communications
 from socket import *
 
