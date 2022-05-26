@@ -16,18 +16,20 @@ clientSocket = socket(AF_INET, SOCK_STREAM)
 # establishing a TCP connection between client and server
 # a three-way handshake happens in the background
 clientSocket.connect((serverName, serverPort))
+serverMessage = clientSocket.recv(1024)
+print('From Server: ', serverMessage.decode())
 
 # prompts user for sentence
-sentence = input('Input lowercase sentence: ')
+clientMessage = input('Enter message to send to server: ')
 
 # send sentence into socket
-clientSocket.send(sentence.encode())
+clientSocket.send(clientMessage.encode())
 
 # read reply from socket
-modifiedSentence = clientSocket.recv(1024)
+serverMessage = clientSocket.recv(1024)
 
 # displays the message converted from bytes to string
-print('From Server: ', modifiedSentence.decode())
+print('From Server: ', serverMessage.decode())
 
 # closes the socket.  end of process.
 clientSocket.close()
