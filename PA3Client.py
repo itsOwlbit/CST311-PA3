@@ -11,24 +11,19 @@ serverPort = 12000          # The server port to be used
 
 # create TCP socket
 clientSocket = socket(AF_INET, SOCK_STREAM)
-
-# client initiates contact with server
-# establishing a TCP connection between client and server
-# a three-way handshake happens in the background
+# Establish TCP connection with server
 clientSocket.connect((serverName, serverPort))
+
+# Message from server
 serverMessage = clientSocket.recv(1024)
 print('From Server: ', serverMessage.decode())
 
-# prompts user for sentence
 clientMessage = input('Enter message to send to server: ')
-
-# send sentence into socket
+# send client message
 clientSocket.send(clientMessage.encode())
 
-# read reply from socket
 serverMessage = clientSocket.recv(1024)
-
-# displays the message converted from bytes to string
+# Display message from server
 print('From Server: ', serverMessage.decode())
 
 # closes the socket.  end of process.
