@@ -7,7 +7,6 @@
 # Answer: 
 
 # socket module used for network communications
-from email import message
 from socket import *
 
 # for threading 2 clients
@@ -15,42 +14,51 @@ import threading
 
 serverPort = 12000                              # set listening port
 serverSocket = socket(AF_INET, SOCK_STREAM)     # create TCP socket with IPv4
-# serverSocket.setsockopt(SOL_SOCKET, SO_KEEPALIVE, 1)
 
-messages = []
-
-def thread_function(connectionSocket, client):
+"""
+This function is used by threads processes of two connected clients so that
+they can function in parallel.
+"""
+def thread_function(connectionSocket, client, mList):
+    # Send acknowledgement to clients that they are connected
     sMessage = 'Client {} connected'.format(str(client))
     connectionSocket.send(sMessage.encode())
 
+    # Receive and store messages into list
     rMessage = connectionSocket.recv(1024).decode()
-    messages.append(client + ': ' + rMessage)
-    print('Client {} sent message {}: {}'.format(str(client), len(messages), rMessage))
+    mList.append(client + ': ' + rMessage)
+    print('Client {} sent message {}: {}'.format(str(client), len(mList), rMessage))
 
+    # Loop until client X and Y messages are received and stored in mList (messages list)
     while True:
-        if(len(messages) == 2):
+        if(len(mList) == 2):
             break
 
-    sMessage = messages[0] + ' recieved before ' + messages[1]
+    # Send final message result to clients showing message receiving order
+    sMessage = mList[0] + ' recieved before ' + mList[1]
     connectionSocket.send(sMessage.encode())
 
-    # close connection socket
-    # server socket is still open
     connectionSocket.close()
 
+"""
+This is the main function.
+"""
 def Main():
-    threadCount = 0
-    threads = []        # list of threads
-    clientValue = ''
+    threadCount = 0     # counter used to know which client connected first.  0 = X, 1 = Y
+    threads = []        # list of threads [0] = X, [1] = Y
+    clientValue = ''    # used to pass client char to its thread
+    messages = []       # list of messages from client in order received
 
     serverSocket.bind(('', serverPort))
-    serverSocket.listen(2)      # maximum number of queued connections is 2
+    # maximum number of queued connections is 2
+    serverSocket.listen(2)
     print('The server is waiting to receive 2 connections....\n')
 
     # Create thread processes using accepted connections for max connections (2)
     for threadCount in range(2):
         connectionSocket, addr = serverSocket.accept()
 
+        # Output which client connected first and set their client value to be passed to its thread
         if threadCount == 0:
             clientValue = 'X'
             print('Accepted first connection, calling it client {}'.format(clientValue))
@@ -58,15 +66,17 @@ def Main():
             clientValue = 'Y'
             print('Accepted second connection, calling it client {}\n'.format(clientValue))
 
-        process = threading.Thread(target=thread_function, args=(connectionSocket, clientValue))
+        # create thread and add to threads list
+        process = threading.Thread(target=thread_function, args=(connectionSocket, clientValue, messages))
         threads.append(process)
         threadCount += 1
 
-    # Start thread processes after max number of threads is reached (2)
+    # Start thread processes after max number of threads are received (2)
     print('Waiting to receive messages from client X and client Y....\n')
     threads[0].start()
     threads[1].start()
 
+    # wait for client threads to terminate before continuing with main
     for t in threads:
         t.join()
 
@@ -75,5 +85,8 @@ def Main():
     print('Done.')
     serverSocket.close()
 
+"""
+Start the program by running Main()
+"""
 if __name__ == '__main__':
     Main()
