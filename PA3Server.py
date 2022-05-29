@@ -1,16 +1,23 @@
 # Names: 
 # Date: May XX, 2022
 # Title: PA3Server.py
-# Description: This is a TCP server program that ...
+# Description: This is a TCP server program that uses threads with two client programs
+# that connect to it.  Both client programs must be connected before the server
+# sends a message to both clients that they have been connected to the server.
+# The server then waits for both clients to send a message to the server before
+# sending the same output to both clients indicating the order in which the client's
+# messages was received by the server and the message they both sent.
+# After both client threads close, the server does some final messages and terminates.
 
 # Question: Explain why you need multithreading to solve this problem.
 # Answer: 
 
 # socket module used for network communications
 from socket import *
-
 # for threading 2 clients
 import threading
+# for sleep while waiting for the threads to close
+import time
 
 serverPort = 12000                              # set listening port
 serverSocket = socket(AF_INET, SOCK_STREAM)     # create TCP socket with IPv4
@@ -50,8 +57,8 @@ def Main():
     messages = []       # list of messages from client in order received
 
     serverSocket.bind(('', serverPort))
-    # maximum number of queued connections is 2
-    serverSocket.listen(2)
+
+    serverSocket.listen(1)
     print('The server is waiting to receive 2 connections....\n')
 
     # Create thread processes using accepted connections for max connections (2)
@@ -73,14 +80,14 @@ def Main():
 
     # Start thread processes after max number of threads are received (2)
     print('Waiting to receive messages from client X and client Y....\n')
-    threads[0].start()
-    threads[1].start()
+    for t in threads:
+        t.start()
 
-    # wait for client threads to terminate before continuing with main
     for t in threads:
         t.join()
 
     print('\nWaiting a bit for clients to close their connections')
+    time.sleep(2)
 
     print('Done.')
     serverSocket.close()
