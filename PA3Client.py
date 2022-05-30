@@ -23,7 +23,6 @@ clientSocket = socket(AF_INET, SOCK_STREAM)
 
 # Check for command line arguments
 # If there are 3 (0: filename, 1: serverName, 2: serverPort)
-n = len(sys.argv)
 if len(sys.argv) == 3:
     serverName = sys.argv[1]
     serverPort = int(sys.argv[2])
